@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        <title>NightScout</title>
+        <link rel='stylesheet' type='text/css' href='css/main.css'>
+        <link rel='stylesheet' type='text/css' href='css/dropdown.css'>
+    </head>
+    <body>
+        <div class='container'>
+            <div class='row-fluid heading'>
+                <div class='span1' style='font-size: 400%'>
+                    <span id='currentTime'>???</span><br>
+                    <span style='font-size: 35%'><span id='watchers'>0</span> watcher(s)</span>
+                </div>
+                <div class='span2'>
+                    <div id="middleTop" class="settings">
+                      <button class="btn toggle" type="button">Settings</button>
+                      <div class="view">
+                        <button class="add btn" type="button">+</button>
+                        <ul class="endpoints">
+                          <li class="descr template">
+                            <form action="#" method="POST" class="config">
+                            <label><span class="chrome">Endpoint
+                              <span class="currentBG"></span>
+                              <span class="x"></span>
+                            </span>
+                              <span class="color"></span>
+                              <input type="text" class="endpoint" />
+                            </label>
+                            <button class="sync" type="submit">Sync</button>
+                            <button class="nix" type="button">X</button>
+                            </form>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                </div>
+                <div class='span3'>
+                    <div id='noButton' style='font-size: 800%'>
+                        <span id='currentBG'>???</span>
+                        <span style='font-size: 20%'>mg/dL</span>
+                    </div>
+                    <div class='bgButton' id='bgButton' style='font-size: 800%' hidden='true'>
+                        <span id='bgValue'>???</span>
+                        <span style='font-size: 20%'>mg/dL</span>
+                    </div>
+                    <ul class="dropdown-menu" id="silenceBtn">
+                        <li><a href="#" data-snooze-time="1200000">Silence for 20 minutes</a></li>
+                        <li><a href="#" data-snooze-time="1800000">Silence for 30 minutes</a></li>
+                        <li><a href="#" data-snooze-time="2400000">Silence for 40 minutes</a></li>
+                        <li><a href="#" data-snooze-time="3000000">Silence for 50 minutes</a></li>
+                        <li><a href="#" data-snooze-time="3600000">Silence for 60 minutes</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class='row-fluid section1'>
+                <div id='chartContainer'></div>
+            </div>
+        </div>
+        <audio id='audio' loop><source src='audio/alarm.ogg' type='audio/ogg'/></audio>
+        <audio id='audio2' loop><source src='audio/alarm2.ogg' type='audio/ogg'/></audio>
+        <script src='/socket.io/socket.io.js'></script>
+        <script src='/bower_components/d3/d3.min.js'></script>
+        <script src='/bower_components/jquery/dist/jquery.min.js'></script>
+        <script src='/bower_components/randomColor/randomColor.js'></script>
+        <script src='js/dropdown.js'></script>
+        <script src='/js/client.js'></script>
+        <script src='/js/aggregate.js'></script>
+    </body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "name": "nightscout-planet",
+  "main": "index.js",
+  "version": "0.0.0",
+  "authors": [
+    "Ben West <bewest@gmail.com>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "static/bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "d3": "~3.4.8",
+    "jquery": "~2.1.1",
+    "randomColor": "~0.1.1"
+  }
+}
