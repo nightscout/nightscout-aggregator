@@ -11,7 +11,7 @@ var http = require('http')
 function monitor (ep, dest) {
   var source = ep.endpoint;
   console.log(ep, source);
-  var sock = client.connect(source);
+  var sock = client.connect(source, {'force new connection': true });
   sock.on('event', console.log.bind(console, 'EVENT'));
   sock.on('now', console.log.bind(console, 'now'));
   sock.on('sgv', function (data) {
@@ -34,8 +34,8 @@ function createServer (opts) {
         })
       );
   var io = ws.listen(server);
+  var backends = { };
   io.sockets.on('connection', function (socket) {
-    var backends = { };
     console.log("connected", arguments);
     socket.on('subscribe', function (ep) {
       // backends.push(ep);
@@ -46,12 +46,14 @@ function createServer (opts) {
     });
     socket.on('unsubscribe', function (ep) {
       console.log('leaving', arguments, ep.color);
+      socket.leave(ep.color);
       if (ep.endpoint in backends) {
         console.log('backend', backends[ep.endpoint]);
-        backends[ep.endpoint].disconnect( );
+        backends[ep.endpoint].socket.disconnect( );
+        // backends[ep.endpoint].close( );
+        delete backends[ep.endpoint];
       }
       // backends.forEach(function (item) { });
-      socket.leave(ep.color);
     });
   });
   // sources.forEach(function (src) { monitor(src, io); });
