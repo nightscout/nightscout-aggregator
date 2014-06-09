@@ -11,7 +11,7 @@ var http = require('http')
 function monitor (ep, dest) {
   var source = ep.endpoint;
   console.log(ep, source);
-  var sock = client.connect(source, {'force new connection': true });
+  var sock = client.connect(source, {'force new connection': true});
   sock.on('event', console.log.bind(console, 'EVENT'));
   sock.on('now', console.log.bind(console, 'now'));
   sock.on('sgv', function (data) {

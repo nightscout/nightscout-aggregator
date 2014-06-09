@@ -72,24 +72,29 @@ function add_row (ev) {
   settings.find('.endpoints').append(clone); 
   clone.find('INPUT.endpoint').focus( );
 }
-
-function remove_row (ev) {
-  var control = $(this).closest('LI');
+function get_ep (control) {
   var opts = {
     color: control.find('.color').text( ) 
   , endpoint: control.find('.endpoint').val( )
   };
+  return opts;
+};
+
+function remove_row (ev) {
+  var control = $(this).closest('LI');
+  var opts = get_ep(control);
   my.master.emit('unsubscribe', opts);
   control.remove( );
 }
 var my = {endpoints: [ ] };
 
 function update_data (ev, glucose, predict, alarms, treatments) {
-  console.log('UPDATE DATA', 'target', ev.target, 'this', this, $(this).find('.currentBG'));
+  var target = $(ev.target);
+  console.log('UPDATE DATA', 'target', target, glucose.length, predict.length);
   // console.log('args', arguments);
   // var glucose = data[0];
   var current = glucose.slice(-1)[0].y;
-  $(ev.target).find('.currentBG').text(current);
+  target.find('.currentBG').text(current);
 
   var data = glucose.map(function (obj) {
     return { date: new Date(obj.x), sgv: obj.y, color: 'grey'}
@@ -100,6 +105,8 @@ function update_data (ev, glucose, predict, alarms, treatments) {
   data = data.concat(alarms.map(function (obj) {
     return { date: new Date(obj.x), sgv: obj.y, color: 'red'}
   }));
+  var opts = get_ep(target);
+  window.update_context(data, opts);
 }
 
 $(document).ready(function ( ) {

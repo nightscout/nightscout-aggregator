@@ -5,7 +5,7 @@
         padding = { top: 20, right: 10, bottom: 30, left: 10},
         opacity = {current: 1, DAY: 1, NIGHT: 0.5},
         now = Date.now(),
-        data = [],
+        // data = [],
         dateFn = function (d) { return new Date(d.date)},
         xScale, xScale2, yScale, yScale2,
         xAxis, yAxis, xAxis2, yAxis2,
@@ -48,9 +48,10 @@
         .attr('class', 'y axis');
 
     // initial setup of chart when data is first made available
-    function initializeCharts() {
+    function initializeCharts(data, source) {
 
         // define the parts of the axis that aren't dependent on width or height
+        console.log('got data', data.length);
         xScale = d3.time.scale()
             .domain(d3.extent(data, function (d) { return d.date; }));
 
@@ -92,7 +93,7 @@
             .on('brush', brushed)
             .on('brushend', brushEnded);
 
-        updateChart(true);
+        updateChart(true, data, source);
     }
 
     // get the desired opacity for context chart based on the brush extent
@@ -151,7 +152,7 @@
         if (brushExtent[1].getTime() - brushExtent[0].getTime() != FOCUS_DATA_RANGE_MS) {
 
             // ensure that brush updating is with the time range
-            if (brushExtent[0].getTime() + FOCUS_DATA_RANGE_MS > d3.extent(data, dateFn)[1].getTime()) {
+            if (brushExtent[0].getTime() + FOCUS_DATA_RANGE_MS > d3.extent([ ], dateFn)[1].getTime()) {
                 d3.select('.brush')
                     .call(brush.extent([new Date(brushExtent[1].getTime() - FOCUS_DATA_RANGE_MS), brushExtent[1]]));
             } else {
@@ -164,7 +165,7 @@
 
         // bind up the focus chart data to an array of circles
         // selects all our data into data and uses date function to get current max date 
-        var focusCircles = focus.selectAll('circle').data(data, dateFn);
+        var focusCircles = focus.selectAll('circle').data([], dateFn);
 
         // if already existing then transition each circle to its new position
         focusCircles.transition()
@@ -189,8 +190,8 @@
         // add treatment bubbles
         var bubbleSize = prevChartWidth < 400 ? 4 : (prevChartWidth < 600 ? 3 : 2);
         focus.selectAll('circle')
-            .data(treatments)
-            .each(function (d) { drawTreatment(d, bubbleSize, true)});
+            // .data(treatments)
+            // .each(function (d) { drawTreatment(d, bubbleSize, true)});
 
         // transition open-top line to correct location
         focus.select('.open-top')
@@ -230,7 +231,7 @@
     }
 
     // called for initial update and updates for resize
-    function updateChart(init) {
+    function updateChart(init, data, source) {
 
         // get current data range
         var dataRange = d3.extent(data, dateFn);
@@ -505,7 +506,11 @@
         //
         // XX DATA CIRCLE
         // bind up the context chart data to an array of circles
-        var contextCircles = context.selectAll('circle')
+        var context_select = 'circle';
+        if (source && source.context) {
+          context_select + '.' + source.context;
+        }
+        var contextCircles = context.selectAll(context_select)
             .data(data);
 
         // if already existing then transition each circle to its new position
@@ -532,13 +537,24 @@
         context.select('.x')
             .call(xAxis2);
     }
+    window.update_context = function (data, ep) {
+      var source = {
+        id: 'set_' + ep.color.slice(1)
+      };
+      if (!isInitialData) {
+          isInitialData = true;
+          initializeCharts(data, source);
+      } else {
+        updateChart(false, data, source);
+      }
+    }
 
     // look for resize but use timer to only call the update script when a resize stops
     var resizeTimer;
     window.onresize = function () {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(function () {
-            updateChart(false);
+            // updateChart(false);
         }, 100);
     };
 
@@ -558,6 +574,9 @@
     // Client-side code to connect to server and handle incoming data
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     var isInitialData = false;
+    /*
+    */
+    function dont_do ( ) {
     var socket = io.connect();
     socket.on('pool', function (d) {
       console.log("POOL OF DATA FROM", d);
@@ -589,10 +608,10 @@
             treatments = d[3];
             if (!isInitialData) {
                 isInitialData = true;
-                initializeCharts();
+                initializeCharts(data);
             }
             else {
-                updateChart(false);
+                updateChart(false, data);
             }
         }
     });
@@ -624,6 +643,7 @@
         console.log('number of clients has changed to ' + watchers);
         $('#watchers').text(watchers);
     });
+    }
 
     // load alarms
     var alarmSound = document.getElementById('audio');
