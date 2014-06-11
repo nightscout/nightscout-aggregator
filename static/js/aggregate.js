@@ -34,6 +34,19 @@ function config_master ( ) {
       var c = data[2];
       var d = data[3];
       console.log('GOT DATA', ep, a.length, b.length, c.length, d.length);
+      var glucose = data[0], predict = data[1],
+          alarms = data[2],
+          treatments = data[3];
+      var plot = glucose.map(function (obj) {
+        return { date: new Date(obj.x), sgv: obj.y, color: 'grey'}
+      });
+      plot = plot.concat(predict.map(function (obj) {
+        return { date: new Date(obj.x), sgv: obj.y, color: 'blue'}
+      }));
+      plot = plot.concat(alarms.map(function (obj) {
+        return { date: new Date(obj.x), sgv: obj.y, color: 'red'}
+      }));
+      my.nightscout.update(ep, plot);
 
       $('.endpoints ' + ep.color).trigger('data', data);
 
@@ -96,6 +109,7 @@ function update_data (ev, glucose, predict, alarms, treatments) {
   var current = glucose.slice(-1)[0].y;
   target.find('.currentBG').text(current);
 
+  /*
   var data = glucose.map(function (obj) {
     return { date: new Date(obj.x), sgv: obj.y, color: 'grey'}
   });
@@ -105,8 +119,9 @@ function update_data (ev, glucose, predict, alarms, treatments) {
   data = data.concat(alarms.map(function (obj) {
     return { date: new Date(obj.x), sgv: obj.y, color: 'red'}
   }));
-  var opts = get_ep(target);
-  window.update_context(data, opts);
+  */
+  // var opts = get_ep(target);
+  // window.update_context(data, opts);
 }
 
 $(document).ready(function ( ) {
@@ -118,6 +133,7 @@ $(document).ready(function ( ) {
   $('.settings FORM.config').on('submit', subscribe);
   $('.endpoints').on('data', update_data);
   my.master = config_master( );
+  my.nightscout = d3.nightscout( );
   console.log('socket', my.master);
   $(document.body).on('keypress', function (ev) {
     if (!$(ev.target).is(":input") && ev.which == ('+').charCodeAt(0)) {
