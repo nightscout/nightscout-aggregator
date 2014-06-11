@@ -37,10 +37,20 @@ function createServer (opts) {
   var backends = { };
   io.sockets.on('connection', function (socket) {
     console.log("connected", arguments);
+    socket.on('list', function (ep) {
+      var list = [ ];
+      Object.keys(backends).forEach(function (i) {
+        var ep = backends[i];
+        list.push(ep.ep);
+      });
+      console.log('listed', list);
+      socket.emit('list', list);
+    });
     socket.on('subscribe', function (ep) {
-      // backends.push(ep);
-      backends[ep.endpoint] = monitor(ep, io);
-      // ep.backend =
+      if (!ep.endpoint in backends) {
+        backends[ep.endpoint] = monitor(ep, io);
+        backends[ep.endpoint].ep = ep;
+      }
       socket.join(ep.color);
       console.log("subscribed", arguments);
     });

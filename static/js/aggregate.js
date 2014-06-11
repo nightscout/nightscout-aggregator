@@ -124,6 +124,24 @@ function update_data (ev, glucose, predict, alarms, treatments) {
   // window.update_context(data, opts);
 }
 
+function restore_list (endpoints) {
+  console.log('restore list', endpoints);
+  var settings = $('.settings');
+  endpoints.forEach(function (ep) {
+    console.log("EP", ep);
+    var clone = settings.find('.endpoints .template').clone(true);
+    clone.removeClass('template').addClass('describe');
+    var color = ep.color;
+    console.log('new', color);
+    clone.find('.color').text(color);
+    clone.find('.endpoint').val(ep.endpoint);
+    clone.find('.color, .chrome').css({color: color});
+    settings.find('.endpoints').append(clone); 
+    clone.find('FORM').submit( );
+    // clone.find('INPUT.endpoint').focus( );
+  });
+}
+
 $(document).ready(function ( ) {
   console.log('aggregator ready', $('.settings, .settings button.toggle'));
   $('.settings button.toggle').on('click', toggle_menu);
@@ -133,6 +151,8 @@ $(document).ready(function ( ) {
   $('.settings FORM.config').on('submit', subscribe);
   $('.endpoints').on('data', update_data);
   my.master = config_master( );
+  my.master.once('list', restore_list);
+  my.master.emit('list');
   my.nightscout = d3.nightscout( );
   console.log('socket', my.master);
   $(document.body).on('keypress', function (ev) {
