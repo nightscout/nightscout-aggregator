@@ -10,6 +10,7 @@
     "socket.io": "~0.9.17",
     "socket.io-client": "~0.9.17",
     "ecstatic": "~0.5.3",
-    "node-static": "~0.7.3"
+    "node-static": "~0.7.3",
+    "bower": "~1.3.5"
   }
 }

@@ -49,7 +49,7 @@ function createServer (opts) {
       socket.emit('list', list);
     });
     socket.on('subscribe', function (ep) {
-      if (!ep.endpoint in backends) {
+      if (!backends[ep.endpoint]) {
         backends[ep.endpoint] = monitor(ep, io);
         backends[ep.endpoint].ep = ep;
       }
