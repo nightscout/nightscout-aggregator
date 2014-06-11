@@ -9,6 +9,7 @@
     "event-stream": "~3.1.5",
     "socket.io": "~0.9.17",
     "socket.io-client": "~0.9.17",
-    "ecstatic": "~0.5.3"
+    "ecstatic": "~0.5.3",
+    "node-static": "~0.7.3"
   }
 }

@@ -2,9 +2,9 @@
 
 
 var http = require('http')
-  , ecstatic = require('ecstatic')
   , ws = require('socket.io')
   , client = require('socket.io-client')
+  , static = require('node-static')
   , es = require('event-stream')
   ;
 
@@ -26,12 +26,14 @@ function monitor (ep, dest) {
 }
 
 function createServer (opts) {
+  var files = new static.Server('./static');
   var server = http.createServer(
-        ecstatic({
-          root: __dirname + '/static/'
-        , autoIndex: true
-        // , showDir: false
-        })
+        function (request, response) {
+          request.addListener('end', function ( ) {
+            files.serve(request, response);
+          }).resume( );
+
+        }
       );
   var io = ws.listen(server);
   var backends = { };
