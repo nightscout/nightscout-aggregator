@@ -56,10 +56,12 @@
         initializeCharts( );
       }
 
-      sugars.append('g')
-        .attr('id', ep.color.slice(1))
-        .attr('class', 'pool')
+      sugars.selectAll(selector)
         .data([tuple])
+        .enter( )
+          .append('g')
+          .attr('id', ep.color.slice(1))
+          .attr('class', 'pool')
         // .call(render_sgv)
       ;
       draw( );
