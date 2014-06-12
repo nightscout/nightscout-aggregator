@@ -61,7 +61,7 @@
       var extending = d3.extent(old.concat().concat(d3.extent(data, dateFn)));
       // XXX: why is this necessary?
       // XXX: why does the now-line walk off the screen?
-      extending.reverse( );
+      // extending.reverse( );
 
       console.log('updated extent', extending);
       my.extent(extending);
@@ -218,6 +218,9 @@
         // update them accordingly
         context.append('g')
             .attr('class', 'x brush')
+            .call(d3.svg.brush().x(xScale2).on('brush', brushed))
+            .attr('height', height - focusHeight);
+            ;
         // create a clipPath for when brushing
         clip = charts.append('defs')
             .append('clipPath')
@@ -301,8 +304,12 @@
           .attr('transform', 'translate(0,' + height + ')')
           .call(xAxis2);
 
+      context.select('.x.brush')
+            .selectAll('rect')
+            .attr('y', focusHeight)
+      ;
       context.select('g.x.brush')
-          .call(d3.svg.brush().x(xScale2).on('brush', brushed))
+          // .call(d3.svg.brush().x(xScale2).on('brush', brushed))
           .selectAll('rect')
           .attr('y', focusHeight)
           .attr('height', height - focusHeight);
@@ -382,8 +389,38 @@
           .style('stroke-dasharray', ('3, 3'))
           .attr('stroke', 'grey');
 
-      // now render the circles
-      brushed(true);
+      var focusTransition = focus.transition().duration(UPDATE_TRANS_MS);
+      var currentBrushExtent = brush.extent();
+      var chartWidth = width;
+      var chartHeight = height;
+
+
+      // update domain
+      xScale2.domain(dataRange);
+
+      context.select('.now-line')
+          .transition()
+          .duration(UPDATE_TRANS_MS)
+          .attr('x1', xScale2(new Date(now)))
+          .attr('y1', yScale2(36))
+          .attr('x2', xScale2(new Date(now)))
+          .attr('y2', yScale2(420));
+
+      // only if a user brush is not active, update brush and focus chart with recent data
+      // else, just transition brush
+      var updateBrush = d3.select('.brush').transition().duration(UPDATE_TRANS_MS);
+      if (!brushInProgress) {
+          updateBrush
+              .call(brush.extent([new Date(dataRange[1].getTime() - FOCUS_DATA_RANGE_MS), dataRange[1]]));
+          brushed(true);
+      } else {
+          updateBrush
+              .call(brush.extent([currentBrushExtent[0], currentBrushExtent[1]]));
+          brushed(true);
+      }
+
+        context.select('.x')
+            .call(xAxis2);
     }
 
     // clears the current user brush and resets to the current real time data
@@ -426,6 +463,7 @@
         }
 
         var brushExtent = brush.extent();
+        console.log('brushExtent', brushExtent);
 
         // ensure that brush extent is fixed at 3.5 hours
         if (brushExtent[1].getTime() - brushExtent[0].getTime() != FOCUS_DATA_RANGE_MS) {
