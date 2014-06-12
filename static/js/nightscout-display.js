@@ -530,6 +530,14 @@
       context = charts.append('g');
       sugars = focus.append('g').attr('class', 'sugars');
       // setup a brush
+      var resizeTimer;
+      window.onresize = function () {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(function () {
+            if (my.extent( ).length > 0) draw( );
+          }, 100);
+      };
+
     }
 
     // initialize everything
