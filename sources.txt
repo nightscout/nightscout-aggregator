@@ -1,0 +1,11 @@
+ba-cgm.azurewebsites.net
+nightscouttd1.azurewebsites.net
+weddingscout.azurewebsites.net
+nightscout.cbrese.com/
+107.170.195.145:1337/
+162.243.156.94:1337/
+162.243.145.11:1337/
+198.199.96.118:1337/
+107.170.222.201:1337/
+162.243.157.54:1337/
+107.170.195.145:1337/
