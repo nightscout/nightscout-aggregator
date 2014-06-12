@@ -10,6 +10,8 @@
 
   var dateFn = function (d) { return new Date(d.date)};
 
+  // This creates our top level closure to create a re-usable d3
+  // component.
   function create (opts) {
     var width, height,
       charts,
@@ -31,6 +33,8 @@
     var container = null;
     var pools = { };
 
+    // This closure provides an API.  Any functions attached as
+    // properties to this object can be used by users.
     function my ( ) {
 
     }
@@ -43,34 +47,48 @@
     my.unsubscribe = function ( ) {
     };
     my.update = function (ep, data) {
+      // Receive new dataset with some endpoint metadata so we know
+      // where it came from.
       console.log('render new data update', ep, data);
+      // reset now
       now = new Date( ).getTime( );
+      // This will be the element that should bind this data
       var selector = 'g#pool_' + ep.color.slice(1) + '.pool';
       var tuple = { ep: ep, data: data };
-      // update domain and extent
+      // update domain/extent of our data
       var old = my.extent( );
       var future = new Date(now + TWENTY_FIVE_MINS_IN_MS);
       var extending = d3.extent(old.concat().concat(d3.extent(data, dateFn)));
+      // XXX: why is this necessary?
+      // XXX: why does the now-line walk off the screen?
       extending.reverse( );
-      // extending = d3.extent(extending.concat([future]), dateFn);
+
       console.log('updated extent', extending);
       my.extent(extending);
+      // If this is the first time, we won't have a valid extent.
       if (old.length == 0) {
+        // initialize all scales, axis, and basic DOM creation for the
+        // whole chart
         initializeCharts( );
       }
 
+      // generate unique element to bind all data per endpoint
       sugars.selectAll(selector)
+        // bind our updated data set to an element
         .data([tuple])
+        // create the element if it does not exist
         .enter( )
           .append('g')
+          // let's call it a "data pool"
           .attr('id', 'pool_' + ep.color.slice(1))
           .attr('class', 'pool')
-        // .call(render_sgv)
       ;
+      // draw everything
       draw( );
 
     };
 
+    // these functions make our global variables accessible to users
     my.width = function (v) {
       if (!isFinite(v)) return width;
       width = v;
@@ -83,6 +101,8 @@
       return my;
     }
 
+    // This manages our global sense of how much data we have across
+    // all data sets.
     var extent = [ ];
     my.extent = function (v) {
       if (!arguments.length) return extent;
@@ -90,6 +110,7 @@
       return my;
     };
 
+    // XXX: unused
     var domain = [0, 0];
     my.domain = function (v) {
       if (!arguments.length) return domain;
@@ -105,21 +126,11 @@
       return my;
     }
 
-    function init ( ) {
-      container = document.getElementById('chartContainer');
-      charts = _setup_container(opts);
-      console.log('charts', charts);
-      focus = _setup_focus(opts);
-      context = charts.append('g');
-      sugars = focus.append('g').attr('class', 'sugars');
-      // setup a brush
-    }
-    init( );
-
-
+    // reset widths/heights based on actual size of element
     function get_dimensions ( ) {
       var bounds = container.getBoundingClientRect();
       var margins = my.margin( );
+      // seems to fit better
       height = bounds.height - (margins.top + margins.left);
       width = bounds.width - (margins.left + margins.right);;
       focusHeight = height * .9;
@@ -200,7 +211,11 @@
             .on('brushstart', brushStarted)
             .on('brush', brushed)
             .on('brushend', brushEnded);
-        // XX
+
+        // create a bunch of basic DOM that will be re-used from here
+        // on out, all the brush, guides, and clipping details
+        // later on, rendering code should look for these elements and
+        // update them accordingly
         context.append('g')
             .attr('class', 'x brush')
         // create a clipPath for when brushing
@@ -248,7 +263,6 @@
         context.append('line')
             .attr('class', 'low-line')
             ;
-        // updateChart(true);
     }
 
     function draw ( ) {
@@ -300,6 +314,7 @@
 
 
       console.log(now, new Date(now), xScale(new Date(now)), xScale(now));
+      // update all the guides, and other DOM for the whole chart
       // add a line that marks the current time
       focus.select('.now-line')
           .attr('x1', xScale(new Date(now)))
@@ -367,6 +382,7 @@
           .style('stroke-dasharray', ('3, 3'))
           .attr('stroke', 'grey');
 
+      // now render the circles
       brushed(true);
     }
 
@@ -426,17 +442,20 @@
 
         xScale.domain(brush.extent());
 
-        // XXX
         // bind up the focus chart data to an array of circles
         // selects all our data into data and uses date function to get current max date 
-        console.log('creating circles');
+        // from update above, each pool has it's own data set bound,
+        // iterate over each one, to bind then render
         sugars.selectAll('.pool').each(function (meta, i) {
           console.log('in sugars updating selection', meta, i, this);
           var elem = d3.select(this);
-          console.log('found data', meta);
+
+          // should we use a path instead?
+          // fetch our updated data set and bind to the circles
           var focusCircles = elem.selectAll('circle').data(meta.data, dateFn);
 
-          // if already existing then transition each circle to its new position
+          // if already existing then transition each circle to its
+          // new position
           focusCircles.transition()
               .duration(UPDATE_TRANS_MS)
               .attr('cx', function (d) { return xScale(d.date); })
@@ -459,6 +478,7 @@
         // remove all insulin/carb treatment bubbles so that they can be redrawn to correct location
         d3.selectAll('.path').remove();
 
+        // XXX: temporarily removed, see above sugars pattern
         // add treatment bubbles
         // var bubbleSize = prevChartWidth < 400 ? 4 : (prevChartWidth < 600 ? 3 : 2);
         focus.selectAll('circle')
@@ -500,6 +520,21 @@
             .call(xAxis);
 
     }
+
+    // setup our basic global variables
+    function init ( ) {
+      container = document.getElementById('chartContainer');
+      charts = _setup_container(opts);
+      console.log('charts', charts);
+      focus = _setup_focus(opts);
+      context = charts.append('g');
+      sugars = focus.append('g').attr('class', 'sugars');
+      // setup a brush
+    }
+
+    // initialize everything
+    init( );
+    // return closure with our api attached
     return my;
   }
 
