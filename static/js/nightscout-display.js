@@ -45,11 +45,14 @@
     my.update = function (ep, data) {
       console.log('render new data update', ep, data);
       now = new Date( ).getTime( );
-      var selector = 'g' + ep.color + '.pool';
+      var selector = 'g#pool_' + ep.color.slice(1) + '.pool';
       var tuple = { ep: ep, data: data };
       // update domain and extent
       var old = my.extent( );
-      var extending = d3.extent(old.concat(d3.extent(data, dateFn)));
+      var future = new Date(now + TWENTY_FIVE_MINS_IN_MS);
+      var extending = d3.extent(old.concat().concat(d3.extent(data, dateFn)));
+      extending.reverse( );
+      // extending = d3.extent(extending.concat([future]), dateFn);
       console.log('updated extent', extending);
       my.extent(extending);
       if (old.length == 0) {
@@ -60,7 +63,7 @@
         .data([tuple])
         .enter( )
           .append('g')
-          .attr('id', ep.color.slice(1))
+          .attr('id', 'pool_' + ep.color.slice(1))
           .attr('class', 'pool')
         // .call(render_sgv)
       ;
@@ -116,8 +119,9 @@
 
     function get_dimensions ( ) {
       var bounds = container.getBoundingClientRect();
-      height = bounds.height;
-      width = bounds.width;
+      var margins = my.margin( );
+      height = bounds.height - (margins.top + margins.left);
+      width = bounds.width - (margins.left + margins.right);;
       focusHeight = height * .9;
       contextHeight = height * .2;
       return bounds;
@@ -197,6 +201,53 @@
             .on('brush', brushed)
             .on('brushend', brushEnded);
         // XX
+        context.append('g')
+            .attr('class', 'x brush')
+        // create a clipPath for when brushing
+        clip = charts.append('defs')
+            .append('clipPath')
+            .attr('id', 'clip')
+            .append('rect')
+            .attr('class', 'viewport')
+            ;
+        // add a line that marks the current time
+        focus.append('line')
+            .attr('class', 'now-line')
+            ;
+        // add a y-axis line that shows the high bg threshold
+        focus.append('line')
+            .attr('class', 'high-line')
+            ;
+
+        // add a y-axis line that shows the low bg threshold
+        focus.append('line')
+            .attr('class', 'low-line')
+            ;
+        // add a y-axis line that opens up the brush extent from the context to the focus
+        focus.append('line')
+            .attr('class', 'open-top')
+            ;
+        // add a x-axis line that closes the the brush container on left side
+        focus.append('line')
+            .attr('class', 'open-left')
+            ;
+
+        // add a x-axis line that closes the the brush container on right side
+        focus.append('line')
+            .attr('class', 'open-right')
+            ;
+        // add a line that marks the current time
+        context.append('line')
+            .attr('class', 'now-line')
+            ;
+        // add a y-axis line that shows the high bg threshold
+        context.append('line')
+            .attr('class', 'high-line')
+            ;
+        // add a y-axis line that shows the low bg threshold
+        context.append('line')
+            .attr('class', 'low-line')
+            ;
         // updateChart(true);
     }
 
@@ -208,9 +259,16 @@
       charts.attr('width', width + padding.left + padding.right)
            .attr('height', height + padding.top + padding.bottom);
 
+      charts.select('rect.viewport')
+          .attr('height', height)
+          .attr('width', width);
+
       // ranges are based on the width and height available so reset
-      xScale.range([0, width]);
-      xScale2.range([0, width]);
+      xScale.range([0, width])
+            // .domain(d3.extent(dataRange.concat([new Date(now + FOCUS_DATA_RANGE_MS)])))
+            ;
+      xScale2.range([0, width])
+          ;
       yScale.range([focusHeight, 0]);
 
       yScale2.range([height, height - contextHeight]);
@@ -229,8 +287,7 @@
           .attr('transform', 'translate(0,' + height + ')')
           .call(xAxis2);
 
-      context.append('g')
-          .attr('class', 'x brush')
+      context.select('g.x.brush')
           .call(d3.svg.brush().x(xScale2).on('brush', brushed))
           .selectAll('rect')
           .attr('y', focusHeight)
@@ -241,18 +298,10 @@
       d3.select('.x.brush').select('.resize.e').style('cursor', 'move');
       d3.select('.x.brush').select('.resize.w').style('cursor', 'move');
 
-      // create a clipPath for when brushing
-      clip = charts.append('defs')
-          .append('clipPath')
-          .attr('id', 'clip')
-          .append('rect')
-          .attr('height', height)
-          .attr('width', width);
 
       console.log(now, new Date(now), xScale(new Date(now)), xScale(now));
       // add a line that marks the current time
-      focus.append('line')
-          .attr('class', 'now-line')
+      focus.select('.now-line')
           .attr('x1', xScale(new Date(now)))
           .attr('y1', yScale(36))
           .attr('x2', xScale(new Date(now)))
@@ -261,8 +310,7 @@
           .attr('stroke', 'grey');
 
       // add a y-axis line that shows the high bg threshold
-      focus.append('line')
-          .attr('class', 'high-line')
+      focus.select('.high-line')
           .attr('x1', xScale(dataRange[0]))
           .attr('y1', yScale(180))
           .attr('x2', xScale(dataRange[1]))
@@ -271,8 +319,7 @@
           .attr('stroke', 'grey');
 
       // add a y-axis line that shows the low bg threshold
-      focus.append('line')
-          .attr('class', 'low-line')
+      focus.select('.low-line')
           .attr('x1', xScale(dataRange[0]))
           .attr('y1', yScale(80))
           .attr('x2', xScale(dataRange[1]))
@@ -281,24 +328,20 @@
           .attr('stroke', 'grey');
 
       // add a y-axis line that opens up the brush extent from the context to the focus
-      focus.append('line')
-          .attr('class', 'open-top')
+      focus.select('.open-top')
           .attr('stroke', 'black')
           .attr('stroke-width', 2);
 
       // add a x-axis line that closes the the brush container on left side
-      focus.append('line')
-          .attr('class', 'open-left')
+      focus.select('.open-left')
           .attr('stroke', 'white');
 
       // add a x-axis line that closes the the brush container on right side
-      focus.append('line')
-          .attr('class', 'open-right')
+      focus.select('.open-right')
           .attr('stroke', 'white');
 
       // add a line that marks the current time
-      context.append('line')
-          .attr('class', 'now-line')
+      context.select('.now-line')
           .attr('x1', xScale(new Date(now)))
           .attr('y1', yScale2(36))
           .attr('x2', xScale(new Date(now)))
@@ -307,8 +350,7 @@
           .attr('stroke', 'grey');
 
       // add a y-axis line that shows the high bg threshold
-      context.append('line')
-          .attr('class', 'high-line')
+      context.select('.high-line')
           .attr('x1', xScale(dataRange[0]))
           .attr('y1', yScale2(180))
           .attr('x2', xScale(dataRange[1]))
@@ -317,8 +359,7 @@
           .attr('stroke', 'grey');
 
       // add a y-axis line that shows the low bg threshold
-      context.append('line')
-          .attr('class', 'low-line')
+      context.select('.low-line')
           .attr('x1', xScale(dataRange[0]))
           .attr('y1', yScale2(80))
           .attr('x2', xScale(dataRange[1]))
@@ -350,19 +391,11 @@
         // update the opacity of the context data points to brush extent
         context.select('circle')
             .style('opacity', function(d) {return 1;} );
-        return;
-        context.selectAll('circle')
-            .data(data)
-            .style('opacity', function(d) {return 1;} );
     }
 
     function brushEnded() {
-        context.select('circle')
-            .style('opacity', function (d) { return highlightBrushPoints(d) });
-        return;
         // update the opacity of the context data points to brush extent
-        context.selectAll('circle')
-            .data(data)
+        context.select('circle')
             .style('opacity', function (d) { return highlightBrushPoints(d) });
     }
 
