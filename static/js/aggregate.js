@@ -38,13 +38,13 @@ function config_master ( ) {
           alarms = data[2],
           treatments = data[3];
       var plot = glucose.map(function (obj) {
-        return { date: new Date(obj.x), sgv: obj.y, color: 'grey'}
+        return { date: new Date(obj.x), sgv: obj.y, color: ep.color}
       });
       plot = plot.concat(predict.map(function (obj) {
-        return { date: new Date(obj.x), sgv: obj.y, color: 'blue'}
+        return { date: new Date(obj.x), sgv: obj.y, color: ep.color}
       }));
       plot = plot.concat(alarms.map(function (obj) {
-        return { date: new Date(obj.x), sgv: obj.y, color: 'red'}
+        return { date: new Date(obj.x), sgv: obj.y, color: ep.color}
       }));
       my.nightscout.update(ep, plot);
 

@@ -8,6 +8,8 @@ var http = require('http')
   , es = require('event-stream')
   ;
 
+var importer = require('./import');
+
 function monitor (ep, dest) {
   var source = ep.endpoint;
   console.log(ep, source);
@@ -50,8 +52,7 @@ function createServer (opts) {
     });
     socket.on('subscribe', function (ep) {
       if (!backends[ep.endpoint]) {
-        backends[ep.endpoint] = monitor(ep, io);
-        backends[ep.endpoint].ep = ep;
+        do_subscribe(ep);
       }
       socket.join(ep.color);
       console.log("subscribed", arguments);
@@ -67,8 +68,18 @@ function createServer (opts) {
       }
       // backends.forEach(function (item) { });
     });
+
+
   });
+    function do_subscribe (ep) {
+        backends[ep.endpoint] = monitor(ep, io);
+        backends[ep.endpoint].ep = ep;
+    }
   // sources.forEach(function (src) { monitor(src, io); });
+  var input = process.env.NIGHTSCOUTS || null;
+  if (input) {
+    importer(input).forEach(do_subscribe);
+  }
   return server;
 
 }
