@@ -49,7 +49,6 @@
         my.update = function (ep, data) {
             // Receive new dataset with some endpoint metadata so we know
             // where it came from.
-            console.log('render new data update', ep, data);
             // reset now
             now = new Date( ).getTime( );
             // This will be the element that should bind this data
@@ -63,7 +62,6 @@
             // XXX: why does the now-line walk off the screen?
             // extending.reverse( );
 
-            console.log('updated extent', extending);
             my.extent(extending);
             // If this is the first time, we won't have a valid extent.
             if (old.length == 0) {
@@ -144,7 +142,7 @@
             var bounds = container.getBoundingClientRect();
             var margins = my.margin( );
             // seems to fit better
-            height = bounds.height - (margins.top + margins.left);
+            height = bounds.height - (margins.top + margins.bottom);
             width = bounds.width - (margins.left + margins.right);;
             focusHeight = height * .7;
             contextHeight = height * .2;
@@ -153,7 +151,6 @@
 
         function _setup_container (opts) {
             // create svg and g to contain the chart contents
-            console.log(margin);
             var padding = margin;
             var charts = d3.select(opts && opts.container || '#chartContainer').append('svg')
                 .append('g')
@@ -178,6 +175,7 @@
 
         // initial setup of chart when data is first made available
         function initializeCharts() {
+            get_dimensions( );
 
             // XX DATA
             // define the parts of the axis that aren't dependent on width or height
@@ -232,6 +230,8 @@
             context.append('g')
                 .attr('class', 'x brush')
                 .call(d3.svg.brush().x(xScale2).on('brush', brushed))
+                .selectAll('rect')
+                .attr('y', focusHeight - height)
                 .attr('height', height - focusHeight);
             ;
             // create a clipPath for when brushing
@@ -240,6 +240,8 @@
                 .attr('id', 'clip')
                 .append('rect')
                 .attr('class', 'viewport')
+                .attr('height', height)
+                .attr('width', width)
             ;
             // add a line that marks the current time
             focus.append('line')
@@ -313,20 +315,27 @@
                 .attr('transform', 'translate(' + width + ',0)')
                 .call(yAxis);
 
+            console.log('transform x to height', height);
             // if first run then just display axis with no transition
             context.select('.x')
                 .attr('transform', 'translate(0,' + height + ')')
                 .call(xAxis2);
 
-            context.select('.x.brush')
-                .selectAll('rect')
-                .attr('y', focusHeight)
+            // context.select('.x.brush')
             ;
+            console.log('heights', 'chart', height, 'focus', focusHeight, 'rect', height - focusHeight);
+            /*
             context.select('g.x.brush')
                 .call(d3.svg.brush().x(xScale2).on('brush', brushed))
                 .selectAll('rect')
                 .attr('y', focusHeight)
-                .attr('height', height - focusHeight);
+                .attr('height', height - focusHeight)
+                ;
+                ;
+                */
+                // .selectAll('rect.background')
+                // .attr('y', focusHeight)
+                // .attr('height', height - focusHeight);
 
             // disable resizing of brush
             d3.select('.x.brush').select('.background').style('cursor', 'move');
@@ -486,7 +495,6 @@
             }
 
             var brushExtent = brush.extent();
-            console.log('brushExtent', brushExtent);
 
             // ensure that brush extent is fixed at 3.5 hours
             if (brushExtent[1].getTime() - brushExtent[0].getTime() != FOCUS_DATA_RANGE_MS) {
@@ -508,7 +516,6 @@
             // from update above, each pool has it's own data set bound,
             // iterate over each one, to bind then render
             sugars.selectAll('.pool').each(function (meta, i) {
-                console.log('in sugars updating selection', meta, i, this);
                 var elem = d3.select(this);
 
                 // should we use a path instead?
@@ -541,7 +548,6 @@
             // from update above, each pool has it's own data set bound,
             // iterate over each one, to bind then render
             context.selectAll('.pool').each(function (meta, i) {
-                console.log('in sugars updating selection', meta, i, this);
                 var elem = d3.select(this);
 
                 // should we use a path instead?

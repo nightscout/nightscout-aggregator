@@ -9,3 +9,4 @@ nightscout.cbrese.com/
 107.170.222.201:1337/
 162.243.157.54:1337/
 107.170.195.145:1337/
+nightscouthd.azurewebsites.net
