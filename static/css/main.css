@@ -41,6 +41,11 @@ body {
   bottom: 5px;
 }
 
+#chartContainer SVG {
+  width: 100%;
+  height: 100%;
+}
+
 .container {
 
   display: block;
