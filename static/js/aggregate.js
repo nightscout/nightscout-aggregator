@@ -9,6 +9,9 @@ function toggle_menu (ev) {
   } else {
     view.addClass('active');
     view.removeClass('hidden');
+    if (view.find('.descr').not('.ready, .template').length == 0) {
+      add_row.apply(this, arguments);
+    }
 
   }
 }

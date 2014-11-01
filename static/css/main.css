@@ -76,3 +76,7 @@ body {
   display: none;
 }
 
+.endpoints .ready {
+  display: none;
+}
+
