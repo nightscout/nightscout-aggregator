@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "description": "Cerebro type of program for looking at Nightscouts",
   "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
   "author": "",
   "license": "BSD-2-Clause",
   "dependencies": {
