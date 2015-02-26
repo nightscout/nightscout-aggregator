@@ -70,20 +70,11 @@ Each Nightscout is kept in a list in the webserver.  The webserver
 itself enrolls in the Nightscout's websocket.  The websocket's address
 is paired internally with a unique random color six hex-digit hash.
 Currently no data is stored, the lens merely allows viewing all the
-data passing through the server in an ephemeral fashion.  No matter
-how many people visit your aggregator, the server itself is
-multiplexing the connections, there is only one connection to the
-monitored Nightscout URLs, no matter how many clients connect to this
-server.  No matter how many people visit your aggregator, the server
-itself is multiplexing the connections, there is only one connection
-to the monitored Nightscout URLs, no matter how many clients connect
-to this server.  No matter how many people visit your aggregator, the
+data passing through the server in an ephemeral fashion.  
+No matter how many people visit your aggregator, the
 server itself is multiplexing the connections, there is only one
 connection to the monitored Nightscout URLs, no matter how many
-clients connect to this server.  No matter how many people visit your
-aggregator, the server itself is multiplexing the connections, there
-is only one connection to the monitored Nightscout URLs, no matter how
-many clients connect to this server.
+clients connect to this server.  
 
 The UI avoids showing any details other than the color hash, the time,
 and the glucose values.
