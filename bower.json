@@ -18,6 +18,7 @@
   "dependencies": {
     "d3": "~3.4.8",
     "jquery": "~2.1.1",
-    "randomColor": "~0.1.1"
+    "randomColor": "~0.1.1",
+    "randomcolor": "randomColor#^0.4.4"
   }
 }
