@@ -4,6 +4,7 @@
   "description": "Cerebro type of program for looking at Nightscouts",
   "main": "server.js",
   "scripts": {
+    "postinstall": "bower install --allow-root",
     "start": "node server.js"
   },
   "author": "",
