@@ -21,7 +21,8 @@ function monitor (ep, dest) {
     if (data.sgvs) {
     console.log('data', data.length, data.sgvs.slice(0, 4));
     // dest.sockets.in(ep.color).emit('sgv', data);
-    dest.sockets.in(ep.color).emit('pool', ep, data.sgvs);
+    // dest.sockets.in(ep.color).emit('pool', ep, data.sgvs);
+    dest.sockets.emit('pool', ep, data.sgvs);
     } else {
       console.log("no sgvs", data);
     }

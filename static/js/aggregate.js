@@ -114,7 +114,7 @@ function update_data (ev, glucose, predict, alarms, treatments) {
   console.log('UPDATE DATA', 'target', target, glucose.length, predict.length);
   // console.log('args', arguments);
   // var glucose = data[0];
-  var current = glucose.slice(-1)[0].y;
+  var current = glucose.slice(-1)[0].mgdl;
   target.find('.currentBG').text(current);
 
   /*

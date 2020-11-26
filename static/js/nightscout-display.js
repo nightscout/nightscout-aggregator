@@ -57,6 +57,18 @@
             // update domain/extent of our data
             var old = my.extent( );
             var future = new Date(now + TWENTY_FIVE_MINS_IN_MS);
+
+            if (sugars.select(selector).data( )[0]) {
+              var old_data = sugars.select(selector).datum( );
+              console.log("previous data!", old_data);
+              if (old_data && old_data.data) {
+                tuple.data = data.concat(old_data.data).slice(288 * 2 * -1);
+                tuple.data.sort(function (a, b) {
+                  return a.date < b.date;
+                });
+              }
+            }
+
             var extending = d3.extent(old.concat().concat(d3.extent(data, dateFn)));
             // XXX: why is this necessary?
             // XXX: why does the now-line walk off the screen?
@@ -69,6 +81,7 @@
                 // whole chart
                 initializeCharts( );
             }
+
 
             // generate unique element to bind all data per endpoint
             sugars.selectAll(selector)
