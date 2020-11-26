@@ -32,6 +32,7 @@ function config_master ( ) {
     });
 
     socket.on('pool', function (ep, data) {
+      /*
       var a = data[0];
       var b = data[1];
       var c = data[2];
@@ -40,8 +41,12 @@ function config_master ( ) {
       var glucose = data[0], predict = data[1],
           alarms = data[2],
           treatments = data[3];
+      */
+      var glucose = data;
+      var predict = [ ];
+      var alarms = [ ];
       var plot = glucose.map(function (obj) {
-        return { date: new Date(obj.x), sgv: obj.y, color: ep.color}
+        return { date: new Date(obj.mills), sgv: obj.mgdl, color: ep.color}
       });
       plot = plot.concat(predict.map(function (obj) {
         return { date: new Date(obj.x), sgv: obj.y, color: ep.color}
@@ -51,7 +56,7 @@ function config_master ( ) {
       }));
       my.nightscout.update(ep, plot);
 
-      $('.endpoints ' + ep.color).trigger('data', data);
+      $('.endpoints ' + ep.color).trigger('data', [data, [], [], []]);
 
     });
     return socket;

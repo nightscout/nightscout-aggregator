@@ -16,12 +16,26 @@ function monitor (ep, dest) {
   var sock = client.connect(source, {'force new connection': true});
   sock.on('event', console.log.bind(console, 'EVENT'));
   sock.on('now', console.log.bind(console, 'now'));
-  sock.on('sgv', function (data) {
-    console.log('ep', ep, 'got data', data.length);
+  sock.on('dataUpdate', function (data) {
+    console.log('ep', ep, 'got data', Object.keys(data));
+    if (data.sgvs) {
+    console.log('data', data.length, data.sgvs.slice(0, 4));
     // dest.sockets.in(ep.color).emit('sgv', data);
-    dest.sockets.in(ep.color).emit('pool', ep, data);
+    dest.sockets.in(ep.color).emit('pool', ep, data.sgvs);
+    } else {
+      console.log("no sgvs", data);
+    }
   });
   sock.on('connect', console.log.bind(console, 'connect'));
+  sock.on('connect', function do_authorize (evt) {
+    sock.emit('authorize', {
+      client: 'web',
+      secret: '',
+      token: false
+    }, function auth_callback (data) {
+      console.log('auth callback', ep, data);
+    });
+  });
   sock.on('error', console.log.bind(console, 'error'));
   sock.on('disconnect', console.log.bind(console, 'disconnect'));
   return sock;
