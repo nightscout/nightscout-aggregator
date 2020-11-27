@@ -13,6 +13,10 @@ var importer = require('./import');
 function monitor (ep, dest) {
   var source = ep.endpoint;
   console.log(ep, source);
+  if (!source || source == "") {
+    console.log('bad spec', dest);
+    return;
+  }
   var sock = client.connect(source, {'force new connection': true});
   sock.on('event', console.log.bind(console, 'EVENT'));
   sock.on('now', console.log.bind(console, 'now'));
@@ -77,7 +81,9 @@ function createServer (opts) {
       socket.leave(ep.color);
       if (ep.endpoint in backends) {
         console.log('backend', backends[ep.endpoint]);
-        backends[ep.endpoint].socket.disconnect( );
+        if (ep.endpoint && backends[ep.endpoint].socket) {
+          backends[ep.endpoint].socket.disconnect( );
+        }
         // backends[ep.endpoint].close( );
         delete backends[ep.endpoint];
       }
