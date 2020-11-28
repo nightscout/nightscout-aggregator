@@ -93,8 +93,12 @@ function createServer (opts) {
 
   });
     function do_subscribe (ep) {
-        backends[ep.endpoint] = monitor(ep, io);
-        backends[ep.endpoint].ep = ep;
+        if (!ep) { return ; }
+        var watched = monitor(ep, io);
+        if (watched) {
+          watched.ep = ep;
+          backends[ep.endpoint] = watched;
+        }
     }
   // sources.forEach(function (src) { monitor(src, io); });
   var input = process.env.NIGHTSCOUTS || null;
